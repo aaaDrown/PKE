@@ -226,16 +226,19 @@ int do_fork( process* parent)
         memcpy((void*)&child->user_heap, (void*)&parent->user_heap, sizeof(parent->user_heap));
         break;
       case CODE_SEGMENT:
-        // TODO (lab3_1): implment the mapping of child code segment to parent's
-        // code segment.
-        // hint: the virtual address mapping of code segment is tracked in mapped_info
-        // page of parent's process structure. use the information in mapped_info to
-        // retrieve the virtual to physical mapping of code segment.
-        // after having the mapping information, just map the corresponding virtual
-        // address region of child to the physical pages that actually store the code
-        // segment of parent process.
-        // DO NOT COPY THE PHYSICAL PAGES, JUST MAP THEM.
-        panic( "You need to implement the code segment mapping of child in lab3_1.\n" );
+      {
+          uint64 parent_va = parent->mapped_info[i].va;
+          uint64 parent_pa = lookup_pa(parent->pagetable, parent_va);
+          user_vm_map(child->pagetable, parent_va, PGSIZE * parent->mapped_info[i].npages, parent_pa, prot_to_type(PROT_READ | PROT_EXEC, 1));
+          sprint("do_fork map code segment at pa:%lx of parent to child at va:%lx.\n", parent_pa, parent_va);
+          // after mapping, register the vm region (do not delete codes below!)
+          child->mapped_info[child->total_mapped_region].va = parent->mapped_info[i].va;
+          child->mapped_info[child->total_mapped_region].npages =
+              parent->mapped_info[i].npages;
+          child->mapped_info[child->total_mapped_region].seg_type = CODE_SEGMENT;
+          child->total_mapped_region++;
+          break;
+      }
 
         // after mapping, register the vm region (do not delete codes below!)
         child->mapped_info[child->total_mapped_region].va = parent->mapped_info[i].va;

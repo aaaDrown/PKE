@@ -463,8 +463,7 @@ struct vinode *rfs_create(struct vinode *parent, struct dentry *sub_dentry) {
   // ** find a free disk inode to store the file that is going to be created
   struct rfs_dinode *free_dinode = NULL;
   int free_inum = 0;
-  for (int i = 0; i < (RFS_BLKSIZE / RFS_INODESIZE * RFS_MAX_INODE_BLKNUM);
-       ++i) {
+  for (int i = 0; i < (RFS_BLKSIZE / RFS_INODESIZE * RFS_MAX_INODE_BLKNUM);++i) {
     free_dinode = rfs_read_dinode(rdev, i);
     if (free_dinode->type == R_FREE) {  // found
       free_inum = i;
@@ -486,7 +485,11 @@ struct vinode *rfs_create(struct vinode *parent, struct dentry *sub_dentry) {
   // nlinks, i.e., the number of links.
   // blocks, i.e., its block count.
   // Note: DO NOT DELETE CODE BELOW PANIC.
-  panic("You need to implement the code of populating a disk inode in lab4_1.\n" );
+  //panic("You need to implement the code of populating a disk inode in lab4_1.\n" );
+  free_dinode->size = 0;
+  free_dinode->nlinks = 1;
+  free_dinode->blocks = 10;
+  free_dinode->type = R_FILE;
 
   // DO NOT REMOVE ANY CODE BELOW.
   // allocate a free block for the file
